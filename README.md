@@ -63,4 +63,4 @@ Ensuite, exécuter dans l'ordre : le notebook 01, `etape3_pretraitement.py`, `et
 ADHD-200 Consortium (2012), *Frontiers in Systems Neuroscience*. Usage non commercial.
 
 ---
-Montaha Trabelsi
+Montaha Trabelsi Molka Achich 
