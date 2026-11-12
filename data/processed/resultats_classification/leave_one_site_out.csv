@@ -1,0 +1,6 @@
+modèle,BA,AUC
+A baseline,0.659,0.694
+B-LR morpho,0.56,0.603
+B-SVM morpho,0.538,0.579
+B-RF morpho,0.575,0.604
+D morpho + A,0.672,0.719
