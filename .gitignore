@@ -1,6 +1,12 @@
 venv/
 __pycache__/
 .ipynb_checkpoints/
-data/raw/
-data/processed/pretraitement/*.nii.gz
-models/*.pt
+
+approche1/ADHD200_BIDS/
+approche1/reports/
+
+approche2/data/raw/
+approche2/data/test_synthstrip/
+approche2/data/processed/pretraitement/*.nii.gz
+approche2/data/processed/**/*.txt
+approche2/models/*.pt

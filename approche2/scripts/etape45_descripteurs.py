@@ -1,11 +1,3 @@
-"""Étapes 4 et 5 en lot : segmentation + descripteurs morphologiques pour chaque
-enfant déjà prétraité (présent dans data/processed/pretraitement/resultats.csv).
-
-Peut être relancé autant de fois que l'on veut : seuls les nouveaux enfants
-sont calculés. Résultat : data/processed/descripteurs.csv (une ligne par enfant).
-
-Usage : python scripts/etape45_descripteurs.py [--suivre]
-"""
 import csv
 import sys
 import time

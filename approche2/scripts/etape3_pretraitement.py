@@ -1,19 +1,3 @@
-"""Étape 3 en lot : retrait du crâne (SynthStrip) -> recalage MNI -> lobe frontal.
-
-Traite tous les enfants de data/processed/table_propre.csv, un par un.
-Le script peut être arrêté et relancé : les enfants déjà faits sont sautés.
-
-Sorties (dans data/processed/pretraitement/) :
-    <site>_<id>_brain.nii.gz    cerveau seul (espace de l'enfant)
-    <site>_<id>_mask.nii.gz     masque du cerveau
-    <site>_<id>_frontal.nii.gz  masque du lobe frontal (espace de l'enfant)
-    resultats.csv               une ligne par enfant réussi (contrôles qualité)
-    erreurs.csv                 une ligne par enfant en échec
-
-Usage (depuis le dossier notebooks/) :
-    python ../scripts/etape3_pretraitement.py            # tous les enfants
-    python ../scripts/etape3_pretraitement.py --limite 2 # test rapide
-"""
 import argparse
 import csv
 import subprocess
@@ -44,7 +28,7 @@ def synthstrip(entree, sortie_cerveau, sortie_masque):
 
 
 def recaler(enfant, modele):
-    """Transformation affine qui envoie le modèle MNI sur le cerveau de l'enfant."""
+    # transformation affine qui envoie le modèle MNI sur le cerveau de l'enfant
     init = sitk.CenteredTransformInitializer(
         enfant, modele, sitk.AffineTransform(3),
         sitk.CenteredTransformInitializerFilter.MOMENTS)

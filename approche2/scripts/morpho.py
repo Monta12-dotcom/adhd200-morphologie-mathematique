@@ -1,16 +1,3 @@
-"""Étapes 4 et 5 : segmentation des tissus et descripteurs de morphologie mathématique.
-
-Toutes les opérations travaillent sur le lobe frontal d'un enfant, rééchantillonné
-à 1 mm isotrope pour que les boules (éléments structurants) aient la même taille
-réelle chez tous les enfants, quel que soit le scanner.
-
-Astuce de calcul : une ouverture / fermeture par une BOULE EUCLIDIENNE de rayon r
-se calcule exactement avec la transformée de distance (EDT) :
-    érosion(X, B_r)   = { x : distance(x, fond) > r }
-    dilatation(X, B_r) = { x : distance(x, X) <= r }
-C'est la même opération que ndi.binary_opening(X, ball(r)) mais 10 à 100 fois
-plus rapide, et elle accepte des rayons non entiers (1,5 mm...).
-"""
 import numpy as np
 import SimpleITK as sitk
 from scipy import ndimage as ndi
@@ -22,6 +9,9 @@ MARGE = 8  # voxels autour du lobe frontal (pour que les boules ne touchent pas 
 
 
 # ---------------------------------------------------------------- outils de base
+# érosion / dilatation par une boule de rayon r (mm) via la transformée de distance :
+#   érosion(X, B_r)    = { x : distance(x, fond) > r }
+#   dilatation(X, B_r) = { x : distance(x, X) <= r }
 def edt(x):
     return ndi.distance_transform_edt(x)
 
@@ -43,7 +33,7 @@ def fermeture(X, r):
 
 
 def gradient_morpho(X, r=1):
-    """Dilatation - érosion : une fine couche autour de la surface de l'objet."""
+    # dilatation - érosion : une fine couche autour de la surface de l'objet
     return dilatation(X, r) & ~erosion(X, r)
 
 
@@ -58,7 +48,7 @@ def _iso_1mm(img, interp):
 
 
 def charger_enfant(f_brain, f_mask, f_frontal):
-    """Renvoie (cerveau, masque, frontal) en tableaux numpy 1 mm, recadrés sur le lobe frontal."""
+    # images à 1 mm isotrope, recadrées autour du lobe frontal
     brain = _iso_1mm(sitk.ReadImage(str(f_brain), sitk.sitkFloat32), sitk.sitkLinear)
     mask = _iso_1mm(sitk.ReadImage(str(f_mask), sitk.sitkUInt8), sitk.sitkNearestNeighbor)
     front = _iso_1mm(sitk.ReadImage(str(f_frontal), sitk.sitkUInt8), sitk.sitkNearestNeighbor)
@@ -76,12 +66,8 @@ def charger_enfant(f_brain, f_mask, f_frontal):
 
 # ---------------------------------------------------------------- étape 4
 def segmenter(b, m, f):
-    """3 classes par Otsu multi-seuils (LCR < matière grise < matière blanche).
-
-    Les seuils sont calculés sur les voxels de cerveau de la zone frontale
-    seulement : ils sont propres à chaque enfant (pas d'unité absolue en IRM)
-    et peu gênés par l'inhomogénéité d'intensité du scanner.
-    """
+    # Otsu 3 classes (LCR < matière grise < matière blanche), seuils propres à chaque enfant
+    # et calculés seulement autour du lobe frontal
     zone = m & dilatation(f, 5)
     t1, t2 = threshold_multiotsu(b[zone], classes=3)
     lcr = m & (b <= t1)
@@ -104,7 +90,7 @@ RAYONS_FERM = [1.0, 2.0, 3.0, 4.0]       # mm
 
 
 def granulometrie_ouvertures(X, rayons=RAYONS_OUV):
-    """Volume restant après chaque ouverture, puis spectre de motifs (volume parti)."""
+    # fraction restante après chaque ouverture, et spectre (fraction partie entre deux rayons)
     v0 = X.sum()
     restes = [v0]
     e = edt(X)
@@ -116,8 +102,7 @@ def granulometrie_ouvertures(X, rayons=RAYONS_OUV):
 
 
 def granulometrie_fermetures(T, f, rayons=RAYONS_FERM):
-    """Fermetures du tissu (matière grise + blanche) : chaque fermeture comble
-    les sillons plus étroits que 2r. On mesure le volume comblé dans le lobe frontal."""
+    # la fermeture du tissu comble les sillons plus étroits que 2r : volume comblé dans le lobe
     vf = f.sum()
     d_ext = edt(~T)
     rempli = [0.0]
@@ -147,7 +132,6 @@ def squelette_epaisseur(gm):
 
 
 def descripteurs(b, m, f, vol_cerveau, seg=None):
-    """Tous les descripteurs d'un enfant (un dictionnaire de nombres)."""
     if seg is None:
         seg = segmenter(b, m, f)
     gm, wm, lcr, gm_f = seg["gm"], seg["wm"], seg["lcr"], seg["gm_f"]
